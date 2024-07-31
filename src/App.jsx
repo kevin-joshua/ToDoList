@@ -3,50 +3,77 @@ import ToDoInput from './ToDoInput';
 import ToDoList from './ToDoList';
 
 function App() {
-  const [todos, setTodo] = useState([]);
+  const [todos, setTodos] = useState([]);
   const [todovalue, setValue] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  function persistData() {
-    localStorage.setItem('todos', JSON.stringify({ todos }));
-  }
+  // Fetch initial todo list from a JSON file
+  useEffect(() => {
+    fetch('/todos.json')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        setTodos(data);
+      })
+      .catch(error => console.error('Error loading todos:', error));
+  }, []);
 
+  // Add a new todo
   function handleAddTodos(newTodo) {
-    if(!newTodo==""){
-    const TodoList = [...todos, newTodo];
-    setTodo(TodoList);
-    persistData();}
+    if (newTodo.task !== "") {
+      const currentdate = new Date();
+      const timestamp = `${currentdate.getDate()}/${currentdate.getMonth() + 1}/${currentdate.getFullYear()}`;
+      const updatedTodos = [...todos, { ...newTodo, timestamp }];
+      setTodos(updatedTodos);
+    }
   }
 
+  // Delete a todo
   function handleDelete(index) {
-    const TodoList = todos.filter((todo, i) => index !== i);
-    setTodo(TodoList);
-    persistData();
+    const updatedTodos = todos.filter((_, i) => index !== i);
+    setTodos(updatedTodos);
   }
 
+  // Edit a todo
   function handleEdit(index) {
-    const valueEdit = todos[index];
-    setValue(valueEdit);
+    const todoToEdit = todos[index];
+    setValue(todoToEdit.task);
     handleDelete(index);
   }
 
-  useEffect(() => {
-    if (!localStorage) {
-      return;
-    }
+  // Handle search input change
+  function handleSearchChange(e) {
+    setSearchQuery(e.target.value);
+  }
 
-    let localTodos = localStorage.getItem('todos');
-    if (!localTodos) {
-      return;
-    }
-    localTodos = JSON.parse(localTodos).todos;
-    setTodo(localTodos);
-  }, []); // Run only once on mount
+  // Filter todos based on search query
+  const filteredTodos = todos.filter(todo =>
+    todo.task.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
-    <main className='min-h-screen flex flex-col items-center bg-pastel-blue py-10'>
-      <h1 className='text-4xl font-bold font-fancy mb-5'>ToDo List</h1>
-      <ToDoInput todovalue={todovalue} setValue={setValue} handleAddTodos={handleAddTodos} />
-      <ToDoList handleEdit={handleEdit} handleDelete={handleDelete} todos={todos} />
+    <main className='min-h-screen flex flex-col items-center bg-background py-10 px-4'>
+      <h1 className='text-5xl font-bold mb-6 text-primary-dark font-montserrat'>
+        TODO LIST
+      </h1>
+      <div className="w-full max-w-lg">
+        <ToDoInput 
+          searchQuery={searchQuery} 
+          handleSearchChange={handleSearchChange} 
+          todovalue={todovalue} 
+          setValue={setValue} 
+          handleAddTodos={handleAddTodos} 
+        />
+        <ToDoList 
+          handleEdit={handleEdit} 
+          handleDelete={handleDelete} 
+          todos={filteredTodos} 
+        />
+      </div>
     </main>
   );
 }

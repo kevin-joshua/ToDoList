@@ -1,25 +1,54 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 function ToDoCard(props) {
-  const { children , handleDelete , index , handleEdit } = props;
+  const { todo, index, handleDelete, handleEdit } = props;
+  const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <div>
-     <ul className='w-full max-w-lg mx-auto mt-5'>
-      <li key={index} className='flex items-center justify-between text-xl bg-gray-100 my-2 mx-3 font-fancy rounded-md px-5 py-3 shadow-sm'>
-      <span className='flex-grow'>{children}</span>
-      <div className='flex space-x-2'>
-            <button onClick={()=> handleEdit(index)}>
-              <i className="fa-solid fa-pen-to-square pl-4"></i>
-            </button>
-            <button className='pl-4' onClick={() => handleDelete(index)}>
-              <i className="fa-solid fa-trash-can"></i>
-            </button>
+    <div className="w-full">
+      <ul className='w-full'>
+        <li key={index} className='flex flex-col bg-white my-2 mx-4 rounded-lg px-4 py-3 shadow-md hover:shadow-lg transition-shadow duration-300'>
+          <div className='flex items-center justify-between'>
+            <span className='text-lg text-text font-medium'>{todo.task}</span>
+            <div className='flex space-x-3'>
+              <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className='mt-2 pb-3 px-1 text-sm text-primary hover:underline'
+              >
+                {isExpanded ? 
+                  <i className="fa-sharp fa-solid fa-caret-up text-accent hover:text-primary transition-colors duration-300"></i> 
+                  : 
+                  <i className="fa-solid fa-caret-down text-accent hover:text-primary transition-colors duration-300"></i>
+                }
+              </button>
+              <button
+                onClick={() => handleEdit(index)}
+                className='text-accent hover:text-primary transition-colors duration-300'
+              >
+                <i className="fa-solid fa-pen-to-square"></i>
+              </button>
+              <button
+                onClick={() => handleDelete(index)}
+                className='text-accent hover:text-primary transition-colors duration-300'
+              >
+                <i className="fa-solid fa-trash-can"></i>
+              </button>
+            </div>
           </div>
+
+          {isExpanded && (
+            <div className='mt-2 text-sm text-text'>
+              <p><strong>Description:</strong> {todo.description}</p>
+              <p><strong>Last Updated:</strong> {todo.timestamp}</p>
+            </div>
+          )}
         </li>
       </ul>
     </div>
   );
 }
 
+
 export default ToDoCard;
+
+
